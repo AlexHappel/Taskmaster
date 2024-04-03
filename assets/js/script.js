@@ -4,6 +4,7 @@ let nextId = JSON.parse(localStorage.getItem("nextId"));
 
 $(document).ready(function() {
     $("#taskForm").on("submit", handleAddTask);
+    $(document).on("click", ".delete-task", handleDeleteTask);
 });
 
 // Todo: create a function to generate a unique task id
@@ -28,8 +29,8 @@ function createTaskCard(task) {
     let taskCardHTML = `
     <div class="card task-card mb-3" id ="task-${task.id}">
         <div class="card-body">
-            <h5 class="card-title">${task.description}</p>
-            <button class="btn btn-danger delete-task" data-task-id=${task.id}">Delete</button>
+            <h5 class="card-title">${task.description}</h5>
+            <button class="btn btn-danger delete-task" data-task-id="${task.id}">Delete</button>
         </div>
     </div>
     `;
@@ -82,24 +83,27 @@ function handleAddTask(event) {
     $("#formModal").modal("hide");
 }
 // Todo: create a function to handle deleting a task
-$(document).on("click", ".delete-task", handleDeleteTask);
+
 
 function handleDeleteTask(event) {
     event.preventDefault();
-    // Get the task ID from the data attribute of the clicked delete button
+    // Get task ID from data attribute of the delete button
     let taskId = $(event.target).data("task-id");
+    console.log("Deleting Task ID:", taskId);
     
-    // Find the index of the task in the taskList array
+    // Find index of task in taskList array
     let taskIndex = taskList.findIndex(task => task.id === taskId);
+    console.log("Task Index:", taskIndex);
     
-    // If the task is found, remove it from the taskList array
+    // If task is found, remove it from taskList array
     if (taskIndex !== -1) {
         taskList.splice(taskIndex, 1);
+        console.log("Task List After Deletion:", taskList);
         
-        // Re-render the task list
+        // Re-render task list
         renderTaskList();
         
-        // Update the tasks in local storage
+        // Update tasks in local storage
         localStorage.setItem("tasks", JSON.stringify(taskList));
         
         console.log("Task deleted:", taskId);
@@ -110,10 +114,41 @@ function handleDeleteTask(event) {
 
 // Todo: create a function to handle dropping a task into a new status lane
 function handleDrop(event, ui) {
-
+    // Get the id of the dropped task
+    let taskId = ui.draggable.attr("id").split("-")[1];
+    
+    // Get the status of the lane where the task was dropped
+    let newStatus = $(this).attr("id").split("-")[0];
+    
+    // Find the task in the taskList array
+    let taskIndex = taskList.findIndex(task => task.id === parseInt(taskId));
+    
+    // If the task is found, update its status
+    if (taskIndex !== -1) {
+        taskList[taskIndex].status = newStatus;
+        
+        // Re-render the task list to reflect the updated status
+        renderTaskList();
+        
+        console.log(`Task ${taskId} moved to ${newStatus}`);
+    } else {
+        console.log(`Task ${taskId} not found`);
+    }
 }
 
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
-$(document).ready(function () {
-
+$(document).ready(function() {
+    $("#taskForm").on("submit", handleAddTask);
+    $(document).on("click", ".delete-task", handleDeleteTask);
+    $(".task-card").draggable({
+        containment: ".container", 
+        revert: true,
+        stack: ".task-card",
+        scroll: true,
+    });
+    $(".lane").droppable({
+        accept: ".task-card",
+        drop: handleDrop
+    });
+    renderTaskList();
 });
