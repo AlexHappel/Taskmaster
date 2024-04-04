@@ -22,16 +22,26 @@ function generateTaskId() {
 
 // Todo: create a function to create a task card
 function createTaskCard(task) {
-    // generate html for task card
+    let now = new Date();
+    let deadlineDate = new Date(task.deadline);
+    let cardColorClass = "";
+
+    if (deadlineDate < now) {
+        cardColorClass = "bg-danger"; // Overdue: red
+    } else if (deadlineDate - now <= 48 * 60 * 60 * 1000) { // 2 days in milliseconds
+        cardColorClass = "bg-warning"; // Nearing deadline: yellow
+    }
+
     let taskCardHTML = `
-    <div class="card task-card mb-3" id ="task-${task.id}">
+    <div class="card task-card mb-3 ${cardColorClass}" id="task-${task.id}">
         <div class="card-body">
-            <h5 class="card-title">${task.description}</h5>
+            <h5 class="card-title">${task.title}</h5>
+            <p class="card-text">${task.description}</p>
+            <p class="card-text">Deadline: ${task.deadline}</p>
             <button class="btn btn-danger delete-task" data-task-id="${task.id}">Delete</button>
         </div>
     </div>
     `;
-    // return html for task card
     return taskCardHTML;
 }    
 
@@ -67,17 +77,20 @@ function renderTaskList() {
 function handleAddTask(event) {
     event.preventDefault();
     let title = $("#taskTitle").val();
+    let deadline = $("#taskDeadline").val();
     let description = $("#taskDescription").val();
     let taskId = generateTaskId();
     let newTask = {
         id: taskId,
         title: title,
         description: description,
-        status: "todo"
+        status: "to-do",
+        deadline: deadline,
     };
     taskList.push(newTask);
     renderTaskList();
     $("#taskTitle").val("");
+    $("#taskDeadline").val("");
     $("#taskDescription").val("");
     $("#formModal").modal("hide");
 }
