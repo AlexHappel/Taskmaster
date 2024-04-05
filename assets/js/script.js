@@ -25,13 +25,13 @@ function createTaskCard(task) {
     let now = new Date();
     let deadlineDate = new Date(task.deadline);
     let cardColorClass = "";
-
+// deadline parameters
     if (deadlineDate < now) {
         cardColorClass = "bg-danger"; // Overdue: red
     } else if (deadlineDate - now <= 48 * 60 * 60 * 1000) { // 2 days in milliseconds
         cardColorClass = "bg-warning"; // Nearing deadline: yellow
     }
-
+// task card html 
     let taskCardHTML = `
     <div class="card task-card mb-3 ${cardColorClass}" id="task-${task.id}">
         <div class="card-body">
@@ -86,7 +86,7 @@ function handleAddTask(event) {
         description: description,
         status: "to-do",
         deadline: deadline,
-    };
+    };    
     taskList.push(newTask);
     renderTaskList();
     $("#taskTitle").val("");
@@ -151,14 +151,16 @@ function handleDrop(event, ui) {
 // Todo: when the page loads, render the task list, add event listeners, make lanes droppable, and make the due date field a date picker
 $(document).ready(function() {
     renderTaskList();
-    $("#taskForm").on("submit", handleAddTask);
+    $("#taskForm").on("submit", handleAddTask);    
     $(document).on("click", ".delete-task", handleDeleteTask);
+// make task cards draggable    
     $(".task-card").draggable({
         containment: ".container", 
         revert: true,
         stack: ".task-card",
         scroll: true,
     });
+// make lanes droppable    
     $(".lane").droppable({
         accept: ".task-card",
         drop: handleDrop
